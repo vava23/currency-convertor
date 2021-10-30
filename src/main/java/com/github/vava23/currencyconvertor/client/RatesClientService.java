@@ -44,11 +44,6 @@ public class RatesClientService {
         Objects.requireNonNull(sourceCurrency, "Source Currency in null");
         Objects.requireNonNull(targetCurrency, "Target Currency in null");
 
-        // Corner cases
-        if (sourceCurrency.equalsIgnoreCase(targetCurrency)) {
-            return BigDecimal.ONE;
-        }
-
         // Get rates from server
         String url = format(
             "http://{0}{1}?access_key={2}&base={3}&symbols={4}", 

@@ -87,21 +87,19 @@ public class RatesClientServiceTest {
         Set<String> currencies = ratesClientService.getAvailableCurrencies();
         assertTrue(currencies.contains("USD"));
         assertTrue(currencies.contains("EUR"));
-        assertFalse(currencies.contains("123"));
+        assertFalse(currencies.contains("123456"));
         assertFalse(currencies.contains(""));
     }
 
     @Test
     void testGetRateSuccess() {
         assertEquals(new BigDecimal("0.72007"), ratesClientService.getRate("USD", "GBP"));
-        assertEquals(BigDecimal.ONE, ratesClientService.getRate("USD", "USD"));
-        assertEquals(BigDecimal.ZERO, ratesClientService.getRate("gbp", "GBP"));
     }
 
     @Test
     void testGetRateFail() {
-        assertThrows(RatesClientException.class, () -> ratesClientService.getRate("USD", "123"));
-        assertThrows(RatesClientException.class, () -> ratesClientService.getRate("123", "USD"));
+        assertThrows(RatesClientException.class, () -> ratesClientService.getRate("USD", "123456"));
+        assertThrows(RatesClientException.class, () -> ratesClientService.getRate("123456", "USD"));
         assertThrows(NullPointerException.class, () -> ratesClientService.getRate(null, "GBP"));
         assertThrows(NullPointerException.class, () -> ratesClientService.getRate("GBP", null));
     }    
