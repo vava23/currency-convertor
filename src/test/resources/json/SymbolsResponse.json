@@ -1,0 +1,13 @@
+{
+    "success": true,
+    "symbols": {
+      "AED": "United Arab Emirates Dirham",
+      "AFN": "Afghan Afghani",
+      "ALL": "Albanian Lek",
+      "AMD": "Armenian Dram",
+      "USD": "US Dollar",
+      "EUR": "Euro",
+      "GBP": "British Pound",
+      "JPY": "Japanese Yen"
+      }
+  }

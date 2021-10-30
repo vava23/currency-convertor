@@ -15,6 +15,7 @@
 	<description>Simple currency converter REST API</description>
 	<properties>
 		<java.version>11</java.version>
+		<mockserver.version>5.11.1</mockserver.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -27,11 +28,19 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.mock-server</groupId>
+			<artifactId>mockserver-junit-jupiter</artifactId>
+			<version>${mockserver.version}</version>
+			<scope>test</scope>
+		</dependency>	
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
