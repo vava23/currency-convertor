@@ -1,14 +1,17 @@
 package com.github.vava23.currencyconvertor.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Set;
 
 import com.github.vava23.currencyconvertor.client.RatesClientService;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -93,5 +96,16 @@ public class CurrencyConvertorServiceTest {
         for (String currency: new String[]{"XYZ", "987654", "", "  ", null}) {
             assertThrows(IllegalArgumentException.class, () -> convertor.validateCurrency(currency));
         }        
+    }
+
+    @Test
+    public void testSupportsCurrency() throws IllegalAccessException {
+        RatesClientService rateService = mockRatesClientService();
+        CurrencyConvertorService convertorService = new CurrencyConvertorService(rateService);
+        assertFalse(convertorService.supportsCurrency("XYZ"));
+        Mockito.when(rateService.getAvailableCurrencies()).thenReturn(Set.of("USD", "EUR", "GBP", "JPY", "XYZ"));
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        FieldUtils.writeField(convertorService, "lastCurrenciesUpdate", yesterday, true);
+        assertTrue(convertorService.supportsCurrency("XYZ"));
     }
 }

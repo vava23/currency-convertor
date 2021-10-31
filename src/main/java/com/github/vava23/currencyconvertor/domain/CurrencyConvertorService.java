@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 import static java.text.MessageFormat.format;
 
@@ -19,8 +20,10 @@ import com.github.vava23.currencyconvertor.client.RatesClientService;
  */
 @Component
 public class CurrencyConvertorService {
-    /** Available currency codes */
+    /** Available currency codes, updated daily if requested */
     private Set<String> availableCurrencies = new HashSet<>();
+    /** Date of last currencies list update */
+    private LocalDate lastCurrenciesUpdate;
     /** Service for obtaining exchange rates */
     RatesClientService ratesService;
 
@@ -41,6 +44,9 @@ public class CurrencyConvertorService {
         this.availableCurrencies = currencies.stream()
                 .map(String::toUpperCase)
                 .collect(Collectors.toSet());
+
+        // Remember the update date
+        lastCurrenciesUpdate = LocalDate.now();
     }
 
     /**
@@ -88,6 +94,10 @@ public class CurrencyConvertorService {
      * Checks if a currency is supported for conversion
      */
     public boolean supportsCurrency(String currency) {
+        // If list of currencies is old, update it first
+        if (LocalDate.now().isAfter(lastCurrenciesUpdate))
+            this.setCurrencies(ratesService.getAvailableCurrencies());
+
         return availableCurrencies.contains(currency.toUpperCase());
     }
 
