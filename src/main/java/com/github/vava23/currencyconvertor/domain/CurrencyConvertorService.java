@@ -96,7 +96,7 @@ public class CurrencyConvertorService {
      */
     public void validateAmount(BigDecimal amount) {
         if (amount == null)
-            throw new IllegalArgumentException("Input amount is null");
+            throw new IllegalArgumentException("Input amount not specified");
         if (amount.compareTo(BigDecimal.ZERO) < 0)
             throw new IllegalArgumentException("Input amount is negative");
     }
@@ -106,12 +106,12 @@ public class CurrencyConvertorService {
      */
     public void validateAmount(String amount) {
         if (amount == null)
-            throw new IllegalArgumentException("Input amount is null");
+            throw new IllegalArgumentException("Input amount not specified");
         BigDecimal amountValue;
         try {
             amountValue = new BigDecimal(amount);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Input amount cannot be parsed");
+            throw new IllegalArgumentException("Input amount cannot be parsed as a number");
         }
         validateAmount(amountValue);
     }    
@@ -121,7 +121,7 @@ public class CurrencyConvertorService {
      */
     public void validateRate(BigDecimal rate) {
         if (rate == null)
-            throw new IllegalArgumentException("Input rate is null");            
+            throw new IllegalArgumentException("Input rate not specified");            
         if (rate.compareTo(BigDecimal.ZERO) <= 0)
             throw new IllegalArgumentException(format("Input rate {0} is not positive", rate));
     }
@@ -131,7 +131,7 @@ public class CurrencyConvertorService {
      */
     public void validateCurrency(String currency) {
         if (currency == null)
-            throw new IllegalArgumentException("Input currency is null");
+            throw new IllegalArgumentException("Input currency not specified");
         if (StringUtils.isBlank(currency)) {
             throw new IllegalArgumentException("Input currency is empty");
         }
