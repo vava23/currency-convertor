@@ -30,7 +30,7 @@ public class RatesClientService {
     @PostConstruct
     private void init() {
         // Get API key from env variable or properties (in order of precedence)
-        String apiKeyEnv = System.getenv("apiKey");
+        String apiKeyEnv = System.getenv("EXCHANGE_RATES_API_KEY");
         if (StringUtils.hasText(apiKeyEnv)) {
             apiKey = apiKeyEnv;
         }
