@@ -19,6 +19,8 @@ import org.springframework.web.client.RestTemplate;
  */
 @Component
 public class RatesClientService {
+    /** Limit of requests, to stay under the API limit or not to exceed it dramatically */
+    private static final int MAX_REQUESTS = 100;
     private static final String RATES_VIEW = "/v1/latest";
     private static final String SYMBOLS_VIEW = "/v1/symbols";
     @Value("${rates.host}")
@@ -26,6 +28,7 @@ public class RatesClientService {
     @Value("${rates.api.key}")
     private String apiKey;
     private RestTemplate restTemplate = new RestTemplate();
+    private int requestCount = 0;
 
     @PostConstruct
     private void init() {
@@ -40,6 +43,9 @@ public class RatesClientService {
      * Retrieves the rate of source currency to target currency
      */
     public BigDecimal getRate(String sourceCurrency, String targetCurrency) {
+        requestCount++;
+        checkRequestCount();
+
         // Checks
         Objects.requireNonNull(sourceCurrency, "Source Currency in null");
         Objects.requireNonNull(targetCurrency, "Target Currency in null");
@@ -71,6 +77,9 @@ public class RatesClientService {
      * Get list if available currencies
      */
     public Set<String> getAvailableCurrencies() {
+        requestCount++;
+        checkRequestCount();
+
         // Get symbols from server
         String url = format(
             "http://{0}{1}?access_key={2}",
@@ -92,5 +101,13 @@ public class RatesClientService {
         }
     }
     
+    /**
+     * Checks request count
+     */
+    private void checkRequestCount() {
+        if (requestCount >= MAX_REQUESTS) {
+            throw new IllegalStateException("Maximum API requests limit reached");
+        }
+    }
 }
 
