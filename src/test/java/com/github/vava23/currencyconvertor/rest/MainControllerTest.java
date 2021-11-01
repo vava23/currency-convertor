@@ -39,6 +39,9 @@ public class MainControllerTest {
                 .thenThrow(IllegalArgumentException.class);
         // Mock validation fail
         Mockito.doThrow(IllegalArgumentException.class).when(mockCurrencyConvertor).validateAmount("-1");
+        Mockito.doThrow(IllegalArgumentException.class).when(mockCurrencyConvertor).validateAmount((String)null);
+        Mockito.doThrow(IllegalArgumentException.class).when(mockCurrencyConvertor).validateCurrency(null);
+        Mockito.doThrow(IllegalArgumentException.class).when(mockCurrencyConvertor).validateCurrency("");
     }
 
     @Test
@@ -60,4 +63,16 @@ public class MainControllerTest {
         mvc.perform(MockMvcRequestBuilders.get("/?source_currency=EUR&target_currency=USD&amount=999999"))
                 .andExpect(status().is5xxServerError());
     }    
+
+    @Test
+    public void testConvertWithoutParams() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get("/?target_currency=USD&amount=100"))
+                .andExpect(status().is4xxClientError());
+        mvc.perform(MockMvcRequestBuilders.get("/?source_currency=EUR&amount=100"))
+                .andExpect(status().is4xxClientError());
+        mvc.perform(MockMvcRequestBuilders.get("/?source_currency=EUR&target_currency=USD"))
+                .andExpect(status().is4xxClientError());                                
+        mvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(status().is4xxClientError());                                                
+    }       
 }

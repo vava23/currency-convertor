@@ -27,11 +27,11 @@ public class MainController {
     /**
      * Currency Conversion endpoint
      */
-    @GetMapping(params = {"source_currency","target_currency","amount"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ConversionResult convert(
-        @RequestParam("source_currency") String sourceCurrencyParam,
-        @RequestParam("target_currency") String targetCurrencyParam,
-        @RequestParam("amount") String amountParam
+        @RequestParam(name="source_currency", required=false) String sourceCurrencyParam,
+        @RequestParam(name="target_currency", required=false) String targetCurrencyParam,
+        @RequestParam(name="amount", required=false) String amountParam
     ) {
         log.info("Incoming request: source_currency={}, target_currency={}, amount={}", sourceCurrencyParam, targetCurrencyParam, amountParam);
         

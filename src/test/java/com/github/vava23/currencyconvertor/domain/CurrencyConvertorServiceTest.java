@@ -90,7 +90,7 @@ public class CurrencyConvertorServiceTest {
     public void testStringValidation() {
         convertor.validateAmount(correctAmount.toString());
         convertor.validateCurrency("USD");
-        for (String amount: new String[]{incorrectAmount.toString(), "twenty", "", "  ", null}) {
+        for (String amount: new String[]{incorrectAmount.toString(), "twenty", "", "  ", null, String.valueOf(Long.MAX_VALUE) + "9"}) {
             assertThrows(IllegalArgumentException.class, () -> convertor.validateAmount(amount));
         }
         for (String currency: new String[]{"XYZ", "987654", "", "  ", null}) {

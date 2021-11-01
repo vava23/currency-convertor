@@ -23,12 +23,21 @@ import com.github.vava23.currencyconvertor.client.RatesClientService;
 @Component
 public class CurrencyConvertorService {
     private static final Logger log = LoggerFactory.getLogger(CurrencyConvertorService.class);
+    /** Maximum acceptable amount, just to have some limit */
+    private static final BigDecimal MAX_AMOUNT;
+    /** MAximun amount string length */
+    private static final int MAX_AMOUNT_LENGTH;
     /** Available currency codes, updated daily if requested */
     private Set<String> availableCurrencies = new HashSet<>();
     /** Date of last currencies list update */
     private LocalDate lastCurrenciesUpdate;
     /** Service for obtaining exchange rates */
     RatesClientService ratesService;
+
+    static {
+        MAX_AMOUNT = BigDecimal.valueOf(Long.MAX_VALUE);
+        MAX_AMOUNT_LENGTH = MAX_AMOUNT.toString().length();
+    }
 
     @Autowired
     public CurrencyConvertorService(RatesClientService ratesService) {
@@ -122,11 +131,17 @@ public class CurrencyConvertorService {
     public void validateAmount(String amount) {
         if (amount == null)
             throw new IllegalArgumentException("Input amount not specified");
+        if (amount.length() > MAX_AMOUNT_LENGTH) {
+            throw new IllegalArgumentException(format("Input amount exceeds the maximum of {0} symbols", MAX_AMOUNT_LENGTH));
+        }            
         BigDecimal amountValue;
         try {
             amountValue = new BigDecimal(amount);
         } catch (Exception e) {
             throw new IllegalArgumentException("Input amount cannot be parsed as a number");
+        }
+        if (amountValue.compareTo(MAX_AMOUNT) > 0) {
+            throw new IllegalArgumentException("Input amount exceeds the maximum of " + MAX_AMOUNT.toString());
         }
         validateAmount(amountValue);
     }    
