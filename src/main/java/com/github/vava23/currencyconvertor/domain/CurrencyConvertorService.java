@@ -9,6 +9,8 @@ import java.time.LocalDate;
 
 import static java.text.MessageFormat.format;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,7 @@ import com.github.vava23.currencyconvertor.client.RatesClientService;
  */
 @Component
 public class CurrencyConvertorService {
+    private static final Logger log = LoggerFactory.getLogger(CurrencyConvertorService.class);
     /** Available currency codes, updated daily if requested */
     private Set<String> availableCurrencies = new HashSet<>();
     /** Date of last currencies list update */
@@ -53,6 +56,8 @@ public class CurrencyConvertorService {
      * Converts amount between specified currencies
      */
     public ConversionResult convert(BigDecimal amount, String sourceCurrency, String targetCurrency) {
+        log.info("Converting from {} {} to {}", amount, sourceCurrency, targetCurrency);
+
         // Prepare the currency codes just in case
         sourceCurrency = sourceCurrency.toUpperCase();
         targetCurrency = targetCurrency.toUpperCase();

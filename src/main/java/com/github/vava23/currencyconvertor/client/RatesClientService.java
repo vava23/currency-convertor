@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -19,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @Component
 public class RatesClientService {
+    private static final Logger log = LoggerFactory.getLogger(RatesClientService.class);
     /** Limit of requests, to stay under the API limit or not to exceed it dramatically */
     private static final int MAX_REQUESTS = 100;
     private static final String RATES_VIEW = "/v1/latest";
@@ -60,6 +63,7 @@ public class RatesClientService {
             targetCurrency);
         ExchangeRatesResult ratesResult;
         try {
+            log.info("Retrieving rates for {} to {} from http://{}{}", sourceCurrency, targetCurrency, host, RATES_VIEW);
             ratesResult = restTemplate.getForObject(url, ExchangeRatesResult.class);
         } catch (RestClientException e) {
             throw new RatesClientException(format("Failed to retrieve rates for currency {0} from {1}", targetCurrency, url), e);
@@ -88,6 +92,7 @@ public class RatesClientService {
             apiKey);
         SupportedSymbolsResult symbolsResult;
         try {
+            log.info("Retrieving supported currencies from http://{}{}", host, SYMBOLS_VIEW);
             symbolsResult = restTemplate.getForObject(url, SupportedSymbolsResult.class);
         } catch (RestClientException e) {
             throw new RatesClientException(format("Failed to retrieve supported currencies from {0}", url), e);
@@ -106,6 +111,7 @@ public class RatesClientService {
      */
     private void checkRequestCount() {
         if (requestCount >= MAX_REQUESTS) {
+            log.error("Maximum API requests limit reached ({} out of {})", requestCount, MAX_REQUESTS);
             throw new IllegalStateException("Maximum API requests limit reached");
         }
     }

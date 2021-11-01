@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import com.github.vava23.currencyconvertor.domain.ConversionResult;
 import com.github.vava23.currencyconvertor.domain.CurrencyConvertorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class MainController {
+    private static final Logger log = LoggerFactory.getLogger(MainController.class);
+
     @Autowired
     CurrencyConvertorService currencyConvertorService;
     
@@ -29,6 +33,8 @@ public class MainController {
         @RequestParam("target_currency") String targetCurrencyParam,
         @RequestParam("amount") String amountParam
     ) {
+        log.info("Incoming request: source_currency={}, target_currency={}, amount={}", sourceCurrencyParam, targetCurrencyParam, amountParam);
+        
         // Validate params and return client error for incorrect params
         // All other exceptions will be considered unexpected
         try {
@@ -40,10 +46,12 @@ public class MainController {
         }
 
         // Calculate and return
-        return currencyConvertorService.convert(
+        ConversionResult result = currencyConvertorService.convert(
             new BigDecimal(amountParam), 
             sourceCurrencyParam, 
             targetCurrencyParam);
+        log.info("Returning result: {} {}", result.getAmount(), result.getCurrency());
+        return result;
     }
 
     /**
@@ -51,8 +59,9 @@ public class MainController {
      */
     @ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
-    public String onException() {
-        return "Internal server error";
+    public String onException(Exception e) {
+        log.error("Unexpected {}: {}", e.getClass().getName(), e.getMessage());
+        return "Sorry, unexpected error occured on our side. Please try again later";
     }
 
     /**
@@ -61,6 +70,7 @@ public class MainController {
     @ResponseStatus(value=HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IncorrectInputException.class)
     public String onIncorrectInputException(IncorrectInputException e) {
-        return "Incorrect input (" + StringUtils.uncapitalize(e.getMessage()) + ")";
+        log.warn("Returning error: parameter validation failed ({})", e.getMessage());
+        return "Error: incorrect input parameter specified (" + StringUtils.uncapitalize(e.getMessage()) + ")";
     }    
 }
