@@ -14,7 +14,6 @@ class CurrencyConvertorApplicationTests {
 	@Autowired
 	MainController mainController;
 
-
 	/** 
 	 * Smoke test
 	 */

@@ -2,6 +2,7 @@ package com.github.vava23.currencyconvertor.rest;
 
 import java.math.BigDecimal;
 
+import com.github.vava23.currencyconvertor.domain.ConversionError;
 import com.github.vava23.currencyconvertor.domain.ConversionResult;
 import com.github.vava23.currencyconvertor.domain.CurrencyConvertorService;
 
@@ -59,9 +60,9 @@ public class MainController {
      */
     @ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
-    public String onException(Exception e) {
+    public ConversionError onException(Exception e) {
         log.error("Unexpected {}: {}", e.getClass().getName(), e.getMessage());
-        return "Sorry, unexpected error occured on our side. Please try again later";
+        return new ConversionError("error", "Unexpected server error occured. Please try again later");
     }
 
     /**
@@ -69,8 +70,8 @@ public class MainController {
      */
     @ResponseStatus(value=HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IncorrectInputException.class)
-    public String onIncorrectInputException(IncorrectInputException e) {
+    public ConversionError onIncorrectInputException(IncorrectInputException e) {
         log.warn("Returning error: parameter validation failed ({})", e.getMessage());
-        return "Error: incorrect input parameter specified (" + StringUtils.uncapitalize(e.getMessage()) + ")";
+        return new ConversionError("error", "Incorrect input parameter specified (" + StringUtils.uncapitalize(e.getMessage()) + ")");
     }    
 }
