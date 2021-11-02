@@ -1,4 +1,4 @@
-# currency-convertor
+# Currency Convertor
 Simple REST service to convert money between currencies
 
 ## API
