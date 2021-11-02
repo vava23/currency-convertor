@@ -1,12 +1,10 @@
 package com.github.vava23.currencyconvertor.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Set;
 
 import com.github.vava23.currencyconvertor.client.RatesClientService;
@@ -26,11 +24,22 @@ public class CurrencyConvertorServiceTest {
 
     @BeforeAll
     public static void setup() {
-        convertor = new CurrencyConvertorService(mockRatesClientService());
+        convertor = mockCurrencyConvertorService(mockRatesClientService());
         correctAmount = new BigDecimal("999.99");
         correctRate = new BigDecimal("7.654321");
         incorrectAmount = new BigDecimal("-999.99");
         incorrectRate = new BigDecimal("-7.654321");            
+    }
+
+    public static CurrencyConvertorService mockCurrencyConvertorService(RatesClientService mockRatesService) {
+        CurrencyConvertorService mockConvertor = new CurrencyConvertorService(mockRatesService);
+        CurrencyReference currencies = new CurrencyReference(mockRatesService);
+        try {
+            FieldUtils.writeField(mockConvertor, "currencyReference", currencies, true);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        return mockConvertor;
     }
 
     public static RatesClientService mockRatesClientService() {
@@ -40,7 +49,7 @@ public class CurrencyConvertorServiceTest {
         Mockito.when(mockRatesService.getRate("GBP", "USD")).thenReturn(new BigDecimal("1.333333"));
         return mockRatesService;
     }
-
+    
     @Test
     public void testConvertWithRateSuccess() {
         BigDecimal result = convertor.convert(correctAmount, correctRate);
@@ -96,16 +105,5 @@ public class CurrencyConvertorServiceTest {
         for (String currency: new String[]{"XYZ", "987654", "", "  ", null}) {
             assertThrows(IllegalArgumentException.class, () -> convertor.validateCurrency(currency));
         }        
-    }
-
-    @Test
-    public void testSupportsCurrency() throws IllegalAccessException {
-        RatesClientService rateService = mockRatesClientService();
-        CurrencyConvertorService convertorService = new CurrencyConvertorService(rateService);
-        assertFalse(convertorService.supportsCurrency("XYZ"));
-        Mockito.when(rateService.getAvailableCurrencies()).thenReturn(Set.of("USD", "EUR", "GBP", "JPY", "XYZ"));
-        LocalDate yesterday = LocalDate.now().minusDays(1);
-        FieldUtils.writeField(convertorService, "lastCurrenciesUpdate", yesterday, true);
-        assertTrue(convertorService.supportsCurrency("XYZ"));
     }
 }

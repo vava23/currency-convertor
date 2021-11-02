@@ -1,21 +1,18 @@
 package com.github.vava23.currencyconvertor.domain;
 
-import java.math.BigDecimal;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.time.LocalDate;
-
 import static java.text.MessageFormat.format;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import java.math.BigDecimal;
+import java.util.List;
 
 import com.github.vava23.currencyconvertor.client.RatesClientService;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
 /**
  * Currency convertion logic
@@ -25,14 +22,14 @@ public class CurrencyConvertorService {
     private static final Logger log = LoggerFactory.getLogger(CurrencyConvertorService.class);
     /** Maximum acceptable amount, just to have some limit */
     private static final BigDecimal MAX_AMOUNT;
-    /** MAximun amount string length */
+    /** Maximun amount string length */
     private static final int MAX_AMOUNT_LENGTH;
-    /** Available currency codes, updated daily if requested */
-    private Set<String> availableCurrencies = new HashSet<>();
-    /** Date of last currencies list update */
-    private LocalDate lastCurrenciesUpdate;
     /** Service for obtaining exchange rates */
-    RatesClientService ratesService;
+    private RatesClientService ratesService;
+    /** Supported currencies reference */
+    @Autowired
+    @Lazy
+    private CurrencyReference currencyReference;
 
     static {
         MAX_AMOUNT = BigDecimal.valueOf(Long.MAX_VALUE);
@@ -42,23 +39,6 @@ public class CurrencyConvertorService {
     @Autowired
     public CurrencyConvertorService(RatesClientService ratesService) {
         this.ratesService = ratesService;
-        this.setCurrencies(this.ratesService.getAvailableCurrencies());
-    }
-
-    /**
-     * Sets the supported currencies
-     */
-    private void setCurrencies(Set<String> currencies) {
-        if (currencies == null)
-            throw new IllegalArgumentException("List of currencies is null");
-
-        // Convert values to uppercase
-        this.availableCurrencies = currencies.stream()
-                .map(String::toUpperCase)
-                .collect(Collectors.toSet());
-
-        // Remember the update date
-        lastCurrenciesUpdate = LocalDate.now();
     }
 
     /**
@@ -74,7 +54,7 @@ public class CurrencyConvertorService {
         // Validate inputs
         List.of(sourceCurrency, targetCurrency).forEach(this::validateCurrency);
         validateAmount(amount);
-
+       
         // Get rate
         BigDecimal rate;
         if (sourceCurrency.equals(targetCurrency)) {
@@ -108,11 +88,7 @@ public class CurrencyConvertorService {
      * Checks if a currency is supported for conversion
      */
     public boolean supportsCurrency(String currency) {
-        // If list of currencies is old, update it first
-        if (LocalDate.now().isAfter(lastCurrenciesUpdate))
-            this.setCurrencies(ratesService.getAvailableCurrencies());
-
-        return availableCurrencies.contains(currency.toUpperCase());
+        return currencyReference.containsCurrency(currency.toUpperCase());
     }
 
     /**
