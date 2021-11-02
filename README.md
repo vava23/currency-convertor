@@ -1,8 +1,7 @@
 # Currency Convertor
-Simple REST service to convert money between currencies
-
+A simple REST service to convert money between currencies
 ## API
-Convertion is available at home view ("/")
+Convertion is available at root path ("/")
 ### Parameters
 - **source_currency**: currency code of input money amount, e.g. EUR
 - **target_currency**: code of desired currency, e.g. USD
@@ -17,3 +16,9 @@ Convertion is available at home view ("/")
     "amount": 120
 }
 ```
+## Configuration
+Currency Convertor retrieves exchange rates from external service:  
+https://exchangeratesapi.io  
+Its API key is necessary and must be specified by either:
+- passing it as environment variable `EXCHANGE_RATES_API_KEY`
+- putting it into application.properties as `rates.api.key`
